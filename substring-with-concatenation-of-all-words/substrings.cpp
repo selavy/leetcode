@@ -1,7 +1,11 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <set>
 #include <string>
 #include <string_view>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include "json.hpp"
 
@@ -9,47 +13,56 @@ using json = nlohmann::json;
 using namespace std;
 
 class Solution {
-public:
-    static int totalWordsLength(const vector<string>& ws) noexcept {
-        return ws.empty() ? 0 : ws.size() * ws[0].size();
+   public:
+    using Counter = unordered_map<string_view, int>;
+
+    static bool allZero(const Counter& c) noexcept {
+        for (const auto& p : c)
+            if (p.second != 0) return false;
+        return true;
     }
 
-    static bool startsWith(string_view sv, const std::string& word) noexcept {
-        return sv.compare(0, word.size(), word.c_str()) == 0;
-    }
-
-    static bool isPerm(string_view str, vector<string> words) noexcept {
-        int pos = 0;
-        while (!str.empty()) {
-            auto found = std::find_if(words.begin(), words.end(),
-                [str](const string& word) { return startsWith(str, word); }
-            );
-            if (found == words.end())
-                return false;
-            str.remove_prefix(found->size());
-            words.erase(found);
+    static void pp(const Counter& c) noexcept {
+        for (auto&& p : c) {
+            std::cout << p.first << "=" << p.second << ", ";
         }
-        return words.empty();
+        std::cout << "\n";
     }
 
     static vector<int> findSubstring(string s, vector<string>& words) noexcept {
         vector<int> results;
-        if (words.empty() || s.empty())
-            return results;
-        std::size_t len = totalWordsLength(words);
-        int N = s.size() - len + 1;
-        for (int pos = 0; pos < N; ++pos) {
-            string_view ss{&s[pos], len};
-            if (isPerm(ss, words)) {
-                results.push_back(pos);
+        auto wlen = words[0].size();
+        auto nwords = words.size();
+        auto tlen = wlen * nwords;
+        auto slen = s.size();
+        size_t l, r;
+        string_view sv{s};
+        for (size_t i = 0; i < wlen; ++i) {
+            Counter counter;
+            for (const auto& word : words)
+                counter[word] += 1;
+            l = r = i;
+            while (r + wlen <= slen) {
+                counter[sv.substr(r, wlen)] -= 1;
+                r += wlen;
+                if ((r - l) > tlen) {
+                    counter[sv.substr(l, wlen)] += 1;
+                    l += wlen;
+                }
+                if ((r - l) == tlen && allZero(counter)) results.push_back(l);
+
+                if ((r - l) == tlen) {
+                    std::cout << sv.substr(l, tlen) << " -- "; //  << std::endl;
+                    pp(counter);
+                }
             }
+            std::cout << "\n\n";
         }
         return results;
     }
 };
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     if (argc != 2) {
         std::cerr << "usage: " << argv[0] << " [FILE]" << std::endl;
         return 0;
@@ -69,8 +82,7 @@ int main(int argc, char** argv)
     }
     auto result = Solution{}.findSubstring(s, words);
     std::cout << "[";
-    for (auto i : result)
-        std::cout << i << ",";
+    for (auto i : result) std::cout << i << ",";
     std::cout << "]\n";
     return 0;
 }
