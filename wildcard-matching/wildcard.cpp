@@ -24,21 +24,25 @@ struct Solution
         // A[0][j] <= (pat = '*') && A[0][j-1]; (handle pat starting with *'s)
         int N = text.size() + 1;
         int M = pat.size() + 1;
-        vector<vector<bool>> A;
-        for (int i = 0; i < N; ++i)
-            A.push_back(vector<bool>(M, false));
-        A[0][0] = true;
+        vector<int> A(N*M, 0);
+        auto ix = [N,M](int i, int j)
+        {
+            assert(0 <= i && i < N);
+            assert(0 <= j && j < M);
+            return i*M + j;
+        };
+        A[ix(0,0)] = true;
         for (int j = 1; j < M; ++j)
-            A[0][j] = pat[j-1] == '*' && A[0][j-1];
+            A[ix(0,j)] = pat[j-1] == '*' && A[ix(0,j-1)];
         for (int i = 1; i < N; ++i) {
             for (int j = 1; j < M; ++j) {
                 if (pat[j-1] == '?' || pat[j-1] == text[i-1])
-                    A[i][j] = A[i-1][j-1];
+                    A[ix(i,j)] = A[ix(i-1,j-1)];
                 else if (pat[j-1] == '*')
-                    A[i][j] = A[i-1][j] || A[i][j-1];
+                    A[ix(i,j)] = A[ix(i-1,j)] || A[ix(i,j-1)];
             }
         }
-        return A[N-1][M-1];
+        return A[ix(N-1,M-1)];
     }
 
     // static bool matchstar(const char* pat, const char* str) noexcept
