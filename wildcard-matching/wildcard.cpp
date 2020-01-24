@@ -13,6 +13,15 @@ struct Solution
 {
     static bool isMatch(string text, string pat) noexcept
     {
+        // DP Solution:
+        // 2-d, A[i][j] => does text [0,i) match with pat [0,j)?
+        // A[i][j] <= {
+        //     if pat[j-1] = '?':       A[i-1][j-1]; // pattern is a single-char wildcard, carry forward
+        //     if pat[j-1] = text[i-1]: A[i-1][j-1]; // pattern matches text char, carry forward
+        //     if pat[j-1] = '*':       A[i-1][j] || A[i][j-1]; // wildcard, either consume a text char or a pattern char
+        // }
+        // A[0][0] <= true;                      (empty pat matches empty text)
+        // A[0][j] <= (pat = '*') && A[0][j-1]; (handle pat starting with *'s)
         int N = text.size() + 1;
         int M = pat.size() + 1;
         vector<vector<bool>> A;
@@ -20,8 +29,7 @@ struct Solution
             A.push_back(vector<bool>(M, false));
         A[0][0] = true;
         for (int j = 1; j < M; ++j)
-            if (pat[j-1] == '*')
-                A[0][j] = A[0][j-1];
+            A[0][j] = pat[j-1] == '*' && A[0][j-1];
         for (int i = 1; i < N; ++i) {
             for (int j = 1; j < M; ++j) {
                 if (pat[j-1] == '?' || pat[j-1] == text[i-1])
@@ -94,6 +102,9 @@ int main(int argc, char** argv)
         { "ho"       , "ho***"  , true  },
         { "hoh"      , "ho***h" , true  },
         { "hoj"      , "ho***h" , false },
+        { "hoj"      , "***ho*h", false },
+        { "hoh"      , "**ho*h" , true  },
+        { "hoh"      , "***ho*h", true  },
     };
 
     for (auto&& c : cases) {
