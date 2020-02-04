@@ -22,44 +22,6 @@ struct Solution
         int x0 = 0, x1 = N; // x = [x0, x1)
         int y0 = 0, y1 = M; // y = [y0, y1)
 
-#if 0
-        while (x1 - x0 > 1 && y1 - y0 > 1) {
-            // top left -> top right
-            for (int x = x0; x < x1; ++x) {
-                result.push_back(matrix[y0][x]);
-            }
-
-            // top right -> bottom right
-            for (int y = y0 + 1; y < y1; ++y) {
-                result.push_back(matrix[y][x1-1]);
-            }
-
-            // bottom right -> bottom left
-            for (int x = x1 - 2; x >= x0; --x) {
-                result.push_back(matrix[y1-1][x]);
-            }
-
-            // bottom right -> top left - 1
-            for (int y = y1 - 2; y > y0; --y) {
-                result.push_back(matrix[y][x0]);
-            }
-
-            x0++; x1--;
-            y0++; y1--;
-        }
-
-        // top left -> top right
-        for (int x = x0; x < x1; ++x) {
-            result.push_back(matrix[y0][x]);
-        }
-
-        // top right -> bottom right
-        for (int y = y0 + 1; y < y1; ++y) {
-            result.push_back(matrix[y][x1-1]);
-        }
-#endif
-
-#if 1
         while (x0 < x1 && y0 < y1) {
             // top left -> top right
             for (int x = x0; x < x1; ++x) {
@@ -88,7 +50,6 @@ struct Solution
             x0++; x1--;
             y0++; y1--;
         }
-#endif
 
         return result;
     }
@@ -124,7 +85,7 @@ int main(int argc, char** argv)
     std::cout << "]\n";
 
     auto sol = Solution{}.spiralOrder(matrix);
-    std::cout << "RESULT : [ ";
+    std::cout << "RESULT: [ ";
     for (auto x : sol)
         std::cout << x << " ";
     std::cout << "]\n";
@@ -133,7 +94,7 @@ int main(int argc, char** argv)
     vector<int> correct;
     for (auto e : j)
         correct.push_back(e);
-    std::cout << "CORRECT: [ ";
+    std::cout << "EXPECT: [ ";
     for (auto x : correct)
         std::cout << x << " ";
     std::cout << "]\n";
